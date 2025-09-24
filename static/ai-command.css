@@ -1,0 +1,288 @@
+/* AI 命令窗口样式 */
+.ai-command-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 20vh;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-command-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.ai-command-modal {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 8px 16px rgba(0, 0, 0, 0.08);
+  width: 90%;
+  max-width: 600px;
+  max-height: 70vh;
+  overflow: hidden;
+  transform: translateY(-20px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-command-overlay.show .ai-command-modal {
+  transform: translateY(0) scale(1);
+}
+
+/* 命令输入区域 */
+.ai-command-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ai-command-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-command-icon {
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai-command-icon::after {
+  content: '🤖';
+  font-size: 14px;
+}
+
+.ai-command-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 400;
+  color: #2d3436;
+  placeholder-color: #636e72;
+  line-height: 1.5;
+}
+
+.ai-command-input::placeholder {
+  color: #636e72;
+}
+
+.ai-command-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #636e72;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 4px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.ai-command-shortcut kbd {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 10px;
+  font-family: inherit;
+}
+
+/* 加载状态 */
+.ai-command-loading {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #636e72;
+  font-size: 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ai-command-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top: 2px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 响应内容区域 */
+.ai-command-content {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.ai-response {
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ai-response:last-child {
+  border-bottom: none;
+}
+
+.ai-response-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ai-response-avatar {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.ai-response-avatar::after {
+  content: '🤖';
+}
+
+.ai-response-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3436;
+}
+
+.ai-response-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2d3436;
+  margin: 0;
+}
+
+.ai-response-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ai-action-btn {
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  color: #667eea;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-action-btn:hover {
+  background: rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.3);
+}
+
+/* 快捷提示 */
+.ai-command-footer {
+  padding: 16px 24px;
+  background: rgba(0, 0, 0, 0.02);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.ai-command-tips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-tip {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #636e72;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-tip:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.2);
+  color: #667eea;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .ai-command-overlay {
+    padding-top: 10vh;
+  }
+  
+  .ai-command-modal {
+    width: 95%;
+    max-height: 80vh;
+  }
+  
+  .ai-command-header {
+    padding: 20px 16px 12px;
+  }
+  
+  .ai-response {
+    padding: 16px;
+  }
+  
+  .ai-command-footer {
+    padding: 12px 16px;
+  }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .ai-command-modal {
+    background: rgba(45, 52, 54, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .ai-command-input {
+    color: #ddd;
+  }
+  
+  .ai-command-input::placeholder {
+    color: #b2bec3;
+  }
+  
+  .ai-response-title,
+  .ai-response-text {
+    color: #ddd;
+  }
+  
+  .ai-command-footer {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}

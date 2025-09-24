@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Debug Tool</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .debug-section {
+            border: 1px solid #0f0;
+            margin: 10px 0;
+            padding: 10px;
+        }
+        .test-element {
+            border: 2px solid #ff0;
+            padding: 10px;
+            margin: 5px 0;
+            background: #333;
+        }
+        .font-test {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+        }
+        .fieldset-test {
+            border: 2px solid #fff;
+            background: #000;
+            color: #fff;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .fieldset-test legend {
+            background: #000;
+            color: #ff0;
+            padding: 0 8px;
+            border: 1px solid #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 CSS DEBUG TOOL</h1>
+    
+    <div class="debug-section">
+        <h2>1. 字体加载测试</h2>
+        <div class="font-test">Press Start 2P Font Test - 像素字体测试</div>
+        <div style="font-family: 'Silkscreen', monospace;">Silkscreen Font Test - 正文字体测试</div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>2. Fieldset结构测试</h2>
+        <fieldset class="fieldset-test">
+            <legend>TEST LEGEND</legend>
+            <p>这是fieldset内容测试</p>
+            <button style="background: #ff0; color: #000; border: 2px solid #fff; padding: 5px;">TEST BUTTON</button>
+        </fieldset>
+    </div>
+    
+    <div class="debug-section">
+        <h2>3. 当前样式状态检查</h2>
+        <div id="style-info"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>4. 实时CSS检查</h2>
+        <button onclick="checkStyles()">检查当前样式</button>
+        <div id="css-check-result"></div>
+    </div>
+    
+    <script>
+        // 检查字体加载状态
+        document.fonts.ready.then(() => {
+            console.log('✅ 所有字体已加载');
+            document.fonts.forEach(font => {
+                console.log(`字体: ${font.family}, 状态: ${font.status}`);
+            });
+        });
+        
+        // 检查样式函数
+        function checkStyles() {
+            const result = document.getElementById('css-check-result');
+            const testElement = document.querySelector('.fieldset-test');
+            const computedStyle = window.getComputedStyle(testElement);
+            
+            result.innerHTML = `
+                <h3>计算后的样式:</h3>
+                <p>字体: ${computedStyle.fontFamily}</p>
+                <p>背景色: ${computedStyle.backgroundColor}</p>
+                <p>边框: ${computedStyle.border}</p>
+                <p>颜色: ${computedStyle.color}</p>
+            `;
+        }
+        
+        // 页面加载时自动检查
+        window.onload = function() {
+            const styleInfo = document.getElementById('style-info');
+            const linkElements = document.querySelectorAll('link[rel="stylesheet"]');
+            
+            styleInfo.innerHTML = `
+                <p>CSS文件数量: ${linkElements.length}</p>
+                <p>页面标题: ${document.title}</p>
+                <p>当前时间: ${new Date().toLocaleString()}</p>
+            `;
+            
+            // 检查主CSS文件是否加载
+            fetch('/static/style.css')
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    }
+                    throw new Error('CSS文件加载失败');
+                })
+                .then(cssText => {
+                    console.log(`✅ CSS文件已加载，大小: ${cssText.length} 字符`);
+                    styleInfo.innerHTML += `<p>CSS文件大小: ${cssText.length} 字符</p>`;
+                })
+                .catch(error => {
+                    console.error('❌ CSS加载错误:', error);
+                    styleInfo.innerHTML += `<p style="color: #f00;">CSS加载错误: ${error.message}</p>`;
+                });
+        };
+    </script>
+</body>
+</html>

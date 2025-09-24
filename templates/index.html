@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能工作台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='ai-pet.css') }}">
+</head>
+<body>
+    <div class="workbench-container">
+        <!-- 第一栏：侧边栏 -->
+        <nav class="sidebar-pane">
+            <div class="sidebar-header">
+                <h2 class="app-title">智能工作台</h2>
+            </div>
+            <div class="nav-menu">
+                <button id="nav-notes" class="nav-btn active" data-view="notes">📝 笔记本</button>
+                <button id="nav-todo" class="nav-btn" data-view="todo">✅ 待办事项</button>
+                <button id="nav-projects" class="nav-btn" data-view="projects">📋 项目管理</button>
+                <button id="nav-ai" class="nav-btn" data-view="ai">🤖 AI助手</button>
+                <button id="nav-habits" class="nav-btn" data-view="habits">🎯 习惯追踪</button>
+            </div>
+        </nav>
+
+        <!-- 第二栏：列表窗格 -->
+        <div class="list-pane">
+            <!-- 笔记本列表视图 -->
+            <div id="notes-list" class="view-content active">
+                <div class="pane-header">
+                    <h3>笔记本</h3>
+                </div>
+                <div class="notebook-list" id="notebook-list">
+                    <!-- 笔记本列表将由JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 待办事项列表视图 -->
+            <div id="todo-list-view" class="view-content">
+                <div class="pane-header">
+                    <h3>待办事项</h3>
+                </div>
+                <div class="todo-input-section">
+                    <input type="text" id="todo-input" placeholder="添加新的待办事项..." class="todo-input">
+                    <input type="date" id="todo-deadline" class="todo-deadline">
+                    <select id="todo-project-select" class="todo-project-select">
+                        <option value="">选择项目</option>
+                    </select>
+                    <button id="add-todo" class="add-btn">添加</button>
+                </div>
+                <div id="todo-list" class="todo-list"></div>
+            </div>
+            
+            <!-- 项目列表视图 -->
+            <div id="projects-list" class="view-content">
+                <div class="pane-header">
+                    <h3>项目</h3>
+                    <button id="add-project" class="add-btn">新建</button>
+                </div>
+                <div id="projects-list-container" class="project-list">
+                    <!-- 项目列表将由JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <!-- AI助手列表视图 -->
+            <div id="ai-list" class="view-content">
+                <div class="pane-header">
+                    <h3>AI对话</h3>
+                    <button id="new-topic-btn" class="add-btn">新话题</button>
+                </div>
+                <div class="topic-sidebar">
+                    <div id="topic-list" class="topic-list">
+                        <!-- 话题列表将由JavaScript动态生成 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 习惯追踪列表视图 -->
+            <div id="habits-list" class="view-content">
+                <div class="pane-header">
+                    <h3>习惯</h3>
+                </div>
+                <div class="habit-input-section">
+                    <input type="text" id="habit-name-input" placeholder="添加新习惯..." class="habit-input">
+                    <button id="create-habit-btn" class="add-btn">创建</button>
+                </div>
+                <div id="habits-grid" class="habits-grid">
+                    <!-- 习惯网格将由JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三栏：内容窗格 -->
+        <div class="content-pane">
+            <!-- 笔记本内容视图 -->
+            <div id="notes-view" class="view-content active">
+                <div class="content-header">
+                    <h2 id="current-notebook-title">默认笔记本</h2>
+                    <div class="button-group" id="notebook-actions">
+                        <button class="action-btn" id="rename-notebook">重命名</button>
+                        <button class="action-btn" id="delete-notebook">删除</button>
+                        <div id="add-notebook-container"></div>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="notebook-content">
+                        <div class="notebook-sidebar">
+                            <div class="topic-list">
+                                <!-- 主题列表将由JavaScript动态生成 -->
+                            </div>
+                        </div>
+                        <div class="notebook-editor">
+                            <textarea id="notepad" placeholder="开始写作..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 待办事项内容视图 -->
+            <div id="todo-view" class="view-content">
+                <div class="content-header">
+                    <h2>待办事项详情</h2>
+                </div>
+                <div class="content-body">
+                    <div id="todo-detail-content">
+                        <!-- 待办事项详情内容 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 项目管理内容视图 -->
+            <div id="projects-view" class="view-content">
+                <div class="content-header">
+                    <h2>项目管理</h2>
+                    <div class="project-controls">
+                        <div class="view-switcher">
+                            <button id="list-view-btn" class="view-btn active">列表视图</button>
+                            <button id="card-view-btn" class="view-btn">卡片视图</button>
+                            <button id="kanban-view-btn" class="view-btn">看板视图</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <!-- 列表视图 -->
+                    <div id="projects-list-view" class="project-view active">
+                        <div id="projects-list" class="projects-container">
+                            <!-- 项目列表内容 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 卡片视图 -->
+                    <div id="projects-card-view" class="project-view">
+                        <div id="projects-cards" class="projects-cards">
+                            <!-- 项目卡片内容 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 看板视图 -->
+                    <div id="projects-kanban-view" class="project-view">
+                        <div class="kanban-board">
+                            <div class="kanban-column">
+                                <h3>待处理</h3>
+                                <div id="pending-projects" class="kanban-items"></div>
+                            </div>
+                            <div class="kanban-column">
+                                <h3>进行中</h3>
+                                <div id="in-progress-projects" class="kanban-items"></div>
+                            </div>
+                            <div class="kanban-column">
+                                <h3>已完成</h3>
+                                <div id="completed-projects" class="kanban-items"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI助手内容视图 -->
+            <div id="ai-view" class="view-content">
+                <div class="content-header">
+                    <h2>AI助手</h2>
+                    <div class="ai-controls">
+                        <select id="ai-model-select" class="model-select">
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="gpt-4">GPT-4</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div id="chat-container" class="chat-container">
+                        <div id="chat-messages" class="chat-messages">
+                            <!-- 聊天消息将由JavaScript动态生成 -->
+                        </div>
+                        <div class="chat-input-container">
+                            <textarea id="chat-input" placeholder="输入消息..." class="chat-input"></textarea>
+                            <button id="send-chat" class="send-btn">发送</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 习惯追踪内容视图 -->
+            <div id="habits-view" class="view-content">
+                <!-- 习惯列表页面 -->
+                <div id="habit-list-page" class="habit-page active">
+                    <div class="content-header">
+                        <h2>习惯追踪</h2>
+                    </div>
+                    <div class="content-body">
+                        <div id="habit-detail-content">
+                            <!-- 习惯详情内容 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 习惯详情页面 -->
+                <div id="habit-detail-page" class="habit-page">
+                    <div class="content-header">
+                        <button id="back-to-habits" class="back-btn">← 返回</button>
+                        <h2 id="current-habit-name">习惯详情</h2>
+                        <div class="habit-actions">
+                            <button id="edit-habit-btn" class="action-btn">编辑</button>
+                            <button id="delete-habit-btn" class="action-btn delete">删除</button>
+                        </div>
+                    </div>
+                    <div class="content-body">
+                        <div class="habit-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">总时长</span>
+                                <span id="total-time-display" class="stat-value">0小时0分钟</span>
+                            </div>
+                        </div>
+                        <div class="habit-timer-section">
+                            <div id="habit-timer" class="timer-display">00:00:00</div>
+                            <div class="timer-controls">
+                                <button id="start-habit-timer" class="timer-btn start">开始</button>
+                                <button id="pause-habit-timer" class="timer-btn pause">暂停</button>
+                                <button id="reset-habit-timer" class="timer-btn reset">重置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 笔记本模态框 -->
+    <div id="notebook-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title">新建笔记本</h3>
+            <div class="form-group">
+                <label for="notebook-name">笔记本名称</label>
+                <input type="text" id="notebook-name" placeholder="输入笔记本名称...">
+            </div>
+            <div id="notebook-project-selection" class="form-group" style="display: none;">
+                <label for="notebook-project">关联项目（可选）</label>
+                <select id="notebook-project">
+                    <option value="">选择项目</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button id="modal-cancel" class="btn btn-secondary">取消</button>
+                <button id="modal-confirm" class="btn btn-primary">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 项目模态框 -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="project-modal-title">新建项目</h3>
+            <div class="form-group">
+                <label for="project-title-input">项目名称</label>
+                <input type="text" id="project-title-input" placeholder="输入项目名称...">
+            </div>
+            <div class="form-group">
+                <label for="project-status-select">项目状态</label>
+                <select id="project-status-select">
+                    <option value="pending">待处理</option>
+                    <option value="in-progress">进行中</option>
+                    <option value="completed">已完成</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button id="project-modal-cancel" class="btn btn-secondary">取消</button>
+                <button id="project-modal-confirm" class="btn btn-primary">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 项目详情模态框 -->
+    <div id="project-detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="project-detail-title">项目详情</h3>
+                <button id="close-project-detail" class="close-btn">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="project-info">
+                    <p><strong>状态：</strong><span id="project-detail-status"></span></p>
+                    <p><strong>创建时间：</strong><span id="project-detail-created"></span></p>
+                    <p><strong>更新时间：</strong><span id="project-detail-updated"></span></p>
+                </div>
+                <div class="project-links">
+                    <div class="link-section">
+                        <h4>关联笔记</h4>
+                        <div id="linked-notes" class="linked-items"></div>
+                        <button id="link-note-btn" class="link-btn">关联笔记</button>
+                    </div>
+                    <div class="link-section">
+                        <h4>关联待办</h4>
+                        <div id="linked-todos" class="linked-items"></div>
+                        <button id="link-todo-btn" class="link-btn">关联待办</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 习惯编辑模态框 -->
+    <div id="habit-edit-modal" class="modal">
+        <div class="modal-content">
+            <h3>编辑习惯</h3>
+            <div class="form-group">
+                <label for="habit-edit-input">习惯名称</label>
+                <input type="text" id="habit-edit-input" placeholder="输入习惯名称...">
+            </div>
+            <div class="modal-actions">
+                <button id="habit-edit-cancel" class="btn btn-secondary">取消</button>
+                <button id="habit-edit-confirm" class="btn btn-primary">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 签到提示 -->
+    <div id="checkin-toast" class="toast">
+        <span class="toast-message">习惯打卡成功！</span>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='ai-pet.js') }}"></script>
+    <script src="{{ url_for('static', filename='ai-command.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,657 @@
+/* AI-Pet 像素机器人样式 - 和谐配色优化版 */
+.ai-pet {
+  position: fixed;
+  width: 64px;
+  height: 64px;
+  z-index: 9999;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.ai-pet:active {
+  cursor: grabbing;
+  transform: scale(1.05);
+}
+
+/* 像素机器人身体 - 和谐蓝色系 */
+.robot-body {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  background: #0A84FF;
+  border: none;
+  box-shadow: 
+    inset 0 0 0 2px #0066CC,
+    inset 0 0 0 4px #004499,
+    0 2px 0 #003366;
+  animation: idle-float 3s ease-in-out infinite;
+}
+
+/* 机器人头部 - 和谐配色 */
+.robot-head {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  width: 32px;
+  height: 24px;
+  background: #3399FF;
+  box-shadow: 
+    inset 0 0 0 2px #0A84FF,
+    inset 0 0 0 4px #0066CC;
+}
+
+/* 像素眼睛容器 */
+.robot-eyes {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 20px;
+  height: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* 像素眼睛 */
+.robot-eye {
+  width: 6px;
+  height: 6px;
+  background: #FFFFFF;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+/* 瞳孔 */
+.robot-eye::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 2px;
+  height: 2px;
+  background: #000000;
+}
+
+/* 像素嘴巴 */
+.robot-mouth {
+  position: absolute;
+  bottom: 4px;
+  left: 12px;
+  width: 8px;
+  height: 2px;
+  background: #2D3436;
+  transition: all 0.3s ease;
+}
+
+/* 像素天线 */
+.robot-antenna {
+  position: absolute;
+  top: -6px;
+  left: 30px;
+  width: 2px;
+  height: 8px;
+  background: #636E72;
+}
+
+.robot-antenna::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -2px;
+  width: 6px;
+  height: 4px;
+  background: #FF3B30;
+}
+
+/* 机器人翅膀 - 拖拽时展开 */
+.robot-wings {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.robot-wing {
+  position: absolute;
+  width: 20px;
+  height: 24px;
+  background: linear-gradient(45deg, #3399FF 0%, #66B3FF 50%, rgba(51, 153, 255, 0.8) 100%);
+  transform-origin: center bottom;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: scaleX(0) scaleY(0.8);
+  border-radius: 50% 10% 50% 10%;
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 2px 8px rgba(10, 132, 255, 0.3);
+}
+
+.robot-wing.left {
+  left: -10px;
+  transform-origin: right bottom;
+}
+
+.robot-wing.right {
+  right: -10px;
+  transform-origin: left bottom;
+}
+
+/* 拖拽状态下展开翅膀 */
+.ai-pet.dragging .robot-wing {
+  opacity: 1;
+  transform: scaleX(1) scaleY(1);
+  animation: wing-flap 0.3s ease-in-out infinite alternate;
+}
+
+.ai-pet.dragging .robot-wing.left {
+  transform: scaleX(1) scaleY(1) rotate(-20deg);
+}
+
+.ai-pet.dragging .robot-wing.right {
+  transform: scaleX(1) scaleY(1) rotate(20deg);
+}
+
+@keyframes wing-flap {
+  0% { transform: scaleY(1) rotate(var(--wing-rotation, 0deg)); }
+  100% { transform: scaleY(0.9) rotate(var(--wing-rotation, 0deg)); }
+}
+
+.ai-pet.dragging .robot-wing.left {
+  --wing-rotation: -20deg;
+}
+
+.ai-pet.dragging .robot-wing.right {
+  --wing-rotation: 20deg;
+}
+
+/* 火箭轨迹容器 */
+.rocket-trail {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ai-pet.dragging .rocket-trail {
+  opacity: 1;
+}
+
+/* 轨迹粒子 */
+.trail-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #FF9500;
+  border-radius: 50%;
+  opacity: 0;
+  animation: trail-particle 0.8s ease-out infinite;
+}
+
+.trail-particle:nth-child(1) {
+  left: 20px;
+  top: 30px;
+  animation-delay: 0s;
+  background: #FF9500;
+}
+
+.trail-particle:nth-child(2) {
+  left: 15px;
+  top: 45px;
+  animation-delay: 0.1s;
+  background: #FF6B35;
+}
+
+.trail-particle:nth-child(3) {
+  left: 25px;
+  top: 60px;
+  animation-delay: 0.2s;
+  background: #FF9500;
+}
+
+.trail-particle:nth-child(4) {
+  left: 10px;
+  top: 35px;
+  animation-delay: 0.3s;
+  background: #FFB366;
+  width: 3px;
+  height: 3px;
+}
+
+.trail-particle:nth-child(5) {
+  left: 30px;
+  top: 50px;
+  animation-delay: 0.4s;
+  background: #FF6B35;
+  width: 2px;
+  height: 2px;
+}
+
+.trail-particle:nth-child(6) {
+  left: 18px;
+  top: 65px;
+  animation-delay: 0.5s;
+  background: #FFB366;
+  width: 3px;
+  height: 3px;
+}
+
+@keyframes trail-particle {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0);
+  }
+  20% {
+    opacity: 0.8;
+    transform: translate(-5px, 5px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-20px, 15px) scale(0.3);
+  }
+}
+
+/* 机器人手臂 - 优化设计 */
+.robot-arms {
+  position: absolute;
+  top: 32px;
+  left: 0;
+  width: 64px;
+  height: 8px;
+}
+
+.robot-arm {
+  position: absolute;
+  width: 16px;
+  height: 8px;
+  background: #0A84FF;
+  box-shadow: inset 0 0 0 2px #0066CC;
+  transition: transform 0.3s ease;
+}
+
+.robot-arm.left {
+  left: -12px;
+  transform: rotate(-15deg);
+  transform-origin: right center;
+}
+
+.robot-arm.right {
+  right: -12px;
+  transform: rotate(15deg);
+  transform-origin: left center;
+}
+
+/* 拖拽时手臂动作 */
+.ai-pet.dragging .robot-arm.left {
+  transform: rotate(-45deg);
+}
+
+.ai-pet.dragging .robot-arm.right {
+  transform: rotate(45deg);
+}
+
+/* 手掌 */
+.robot-arm::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #3399FF;
+  box-shadow: inset 0 0 0 1px #0066CC;
+}
+
+.robot-arm.left::after {
+  left: -6px;
+  top: 1px;
+}
+
+.robot-arm.right::after {
+  right: -6px;
+  top: 1px;
+}
+
+/* 机器人腿部 - 优化设计 */
+.robot-legs {
+  position: absolute;
+  bottom: -12px;
+  left: 16px;
+  width: 32px;
+  height: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.robot-leg {
+  width: 10px;
+  height: 16px;
+  background: #0A84FF;
+  box-shadow: inset 0 0 0 2px #0066CC;
+  position: relative;
+}
+
+/* 脚部 */
+.robot-leg::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: -2px;
+  width: 14px;
+  height: 4px;
+  background: #3399FF;
+  box-shadow: inset 0 0 0 1px #0066CC;
+}
+
+/* 像素装饰面板 */
+.robot-chest {
+  position: absolute;
+  top: 36px;
+  left: 24px;
+  width: 16px;
+  height: 12px;
+  background: #0066CC;
+}
+
+.robot-chest::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 2px;
+  background: #3399FF;
+}
+
+.robot-chest::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 2px;
+  width: 12px;
+  height: 2px;
+  background: #3399FF;
+}
+
+/* 状态动画 */
+@keyframes idle-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes happy-bounce {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  25% { transform: translateY(-6px) scale(1.02); }
+  50% { transform: translateY(-3px) scale(1.01); }
+  75% { transform: translateY(-4px) scale(1.015); }
+}
+
+@keyframes sleeping-sway {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+/* 开心状态 - 和谐绿色 */
+.ai-pet.happy .robot-body {
+  animation: happy-bounce 0.8s ease-in-out;
+  background: #34C759;
+  box-shadow: 
+    inset 0 0 0 2px #28A745,
+    inset 0 0 0 4px #1E7E34,
+    0 2px 0 #155724;
+}
+
+.ai-pet.happy .robot-head {
+  background: #5ED670;
+  box-shadow: 
+    inset 0 0 0 2px #34C759,
+    inset 0 0 0 4px #28A745;
+}
+
+.ai-pet.happy .robot-arm,
+.ai-pet.happy .robot-leg {
+  background: #34C759;
+  box-shadow: inset 0 0 0 2px #28A745;
+}
+
+.ai-pet.happy .robot-mouth {
+  width: 6px;
+  height: 4px;
+  background: #2D3436;
+  transform: rotate(180deg);
+}
+
+/* 睡眠状态 - 柔和灰色 */
+.ai-pet.sleeping .robot-body {
+  animation: sleeping-sway 2s ease-in-out infinite;
+  opacity: 0.8;
+  background: #8E8E93;
+  box-shadow: 
+    inset 0 0 0 2px #6D6D70,
+    inset 0 0 0 4px #48484A,
+    0 2px 0 #2C2C2E;
+}
+
+.ai-pet.sleeping .robot-head {
+  background: #AEAEB2;
+  box-shadow: 
+    inset 0 0 0 2px #8E8E93,
+    inset 0 0 0 4px #6D6D70;
+}
+
+.ai-pet.sleeping .robot-arm,
+.ai-pet.sleeping .robot-leg {
+  background: #8E8E93;
+  box-shadow: inset 0 0 0 2px #6D6D70;
+}
+
+.ai-pet.sleeping .robot-eye {
+  height: 2px;
+  background: #636E72;
+}
+
+.ai-pet.sleeping .robot-eye::after {
+  display: none;
+}
+
+/* ZZZ 睡眠气泡动画 */
+.zzz-container {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.ai-pet.sleeping .zzz-container {
+  opacity: 1;
+}
+
+.zzz {
+  position: absolute;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  color: #8E8E93;
+  animation: zzz-float 2s ease-in-out infinite;
+}
+
+.zzz:nth-child(1) {
+  left: -5px;
+  top: 0;
+  animation-delay: 0s;
+}
+
+.zzz:nth-child(2) {
+  left: 5px;
+  top: -8px;
+  animation-delay: 0.5s;
+}
+
+.zzz:nth-child(3) {
+  left: 15px;
+  top: -16px;
+  animation-delay: 1s;
+}
+
+@keyframes zzz-float {
+  0% {
+    opacity: 0;
+    transform: translateY(0px) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.8);
+  }
+}
+
+/* 说话气泡 - 和谐样式 */
+.speech-bubble {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #FFFFFF;
+  border: 2px solid #0A84FF;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1A1A1A;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-50%) translateY(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  font-family: var(--font-primary);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(10, 132, 255, 0.15);
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+  border-top-color: #FFFFFF;
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-top-color: #0A84FF;
+  z-index: -1;
+}
+
+.speech-bubble.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .ai-pet {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .robot-body {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .robot-head {
+    width: 24px;
+    height: 18px;
+    top: 6px;
+    left: 12px;
+  }
+  
+  .robot-eyes {
+    width: 16px;
+    top: 4px;
+    left: 4px;
+  }
+  
+  .robot-eye {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .robot-arm {
+    width: 12px;
+    height: 6px;
+  }
+  
+  .robot-leg {
+    width: 8px;
+    height: 12px;
+  }
+  
+  .robot-wings {
+    width: 60px;
+    height: 18px;
+  }
+  
+  .robot-wing {
+    width: 15px;
+    height: 18px;
+  }
+}
+
+/* 拖拽状态 */
+.ai-pet.dragging {
+  z-index: 10000;
+  transform: scale(1.1) rotate(3deg);
+  filter: drop-shadow(2px 4px 0px rgba(10, 132, 255, 0.3));
+}
+
+/* 眼球跟随效果 - 像素化 */
+.robot-eye.looking-left::after {
+  left: 0px;
+}
+
+.robot-eye.looking-right::after {
+  left: 4px;
+}
+
+.robot-eye.looking-up::after {
+  top: 0px;
+}
+
+.robot-eye.looking-down::after {
+  top: 4px;
+}
+
+/* 像素闪烁效果 */
+@keyframes pixel-blink {
+  0%, 90%, 100% { opacity: 1; }
+  95% { opacity: 0; }
+}
+
+.ai-pet.blinking .robot-eye {
+  animation: pixel-blink 2s infinite;
+}
