@@ -20,6 +20,7 @@
                 <button id="nav-projects" class="nav-btn" data-view="projects">📋 项目管理</button>
                 <button id="nav-ai" class="nav-btn" data-view="ai">🤖 AI助手</button>
                 <button id="nav-habits" class="nav-btn" data-view="habits">🎯 习惯追踪</button>
+                <button id="nav-weekly-report" class="nav-btn" data-view="weekly-report">📊 周报生成</button>
             </div>
         </nav>
 
@@ -86,6 +87,34 @@
                 </div>
                 <div id="habits-grid" class="habits-grid">
                     <!-- 习惯网格将由JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 周报生成列表视图 -->
+            <div id="weekly-report-list" class="view-content">
+                <div class="pane-header">
+                    <h3>周报配置</h3>
+                </div>
+                <div class="report-config-section">
+                    <div class="form-group">
+                        <label for="report-start-date">开始日期</label>
+                        <input type="date" id="report-start-date" class="report-date-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="report-end-date">结束日期</label>
+                        <input type="date" id="report-end-date" class="report-date-input">
+                    </div>
+                    <div class="form-group">
+                        <label>包含内容</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="include-notes" checked> 笔记内容</label>
+                            <label><input type="checkbox" id="include-todos" checked> 待办事项</label>
+                            <label><input type="checkbox" id="include-projects" checked> 项目进度</label>
+                            <label><input type="checkbox" id="include-habits" checked> 习惯统计</label>
+                            <label><input type="checkbox" id="include-ai-chats"> AI对话记录</label>
+                        </div>
+                    </div>
+                    <button id="generate-report-btn" class="add-btn">生成周报</button>
                 </div>
             </div>
         </div>
@@ -201,43 +230,17 @@
 
             <!-- 习惯追踪内容视图 -->
             <div id="habits-view" class="view-content">
-                <!-- 习惯列表页面 -->
-                <div id="habit-list-page" class="habit-page active">
-                    <div class="content-header">
-                        <h2>习惯追踪</h2>
-                    </div>
-                    <div class="content-body">
-                        <div id="habit-detail-content">
-                            <!-- 习惯详情内容 -->
-                        </div>
-                    </div>
+                <!-- 现有习惯追踪内容 -->
+            </div>
+            
+            <!-- 周报生成内容视图 -->
+            <div id="weekly-report-view" class="view-content">
+                <div class="content-header">
+                    <h2>周报生成</h2>
                 </div>
-                
-                <!-- 习惯详情页面 -->
-                <div id="habit-detail-page" class="habit-page">
-                    <div class="content-header">
-                        <button id="back-to-habits" class="back-btn">← 返回</button>
-                        <h2 id="current-habit-name">习惯详情</h2>
-                        <div class="habit-actions">
-                            <button id="edit-habit-btn" class="action-btn">编辑</button>
-                            <button id="delete-habit-btn" class="action-btn delete">删除</button>
-                        </div>
-                    </div>
-                    <div class="content-body">
-                        <div class="habit-stats">
-                            <div class="stat-item">
-                                <span class="stat-label">总时长</span>
-                                <span id="total-time-display" class="stat-value">0小时0分钟</span>
-                            </div>
-                        </div>
-                        <div class="habit-timer-section">
-                            <div id="habit-timer" class="timer-display">00:00:00</div>
-                            <div class="timer-controls">
-                                <button id="start-habit-timer" class="timer-btn start">开始</button>
-                                <button id="pause-habit-timer" class="timer-btn pause">暂停</button>
-                                <button id="reset-habit-timer" class="timer-btn reset">重置</button>
-                            </div>
-                        </div>
+                <div class="content-body">
+                    <div id="weekly-report-content">
+                        <!-- 周报内容将由JavaScript动态生成 -->
                     </div>
                 </div>
             </div>
@@ -338,6 +341,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='weekly-report.js') }}"></script>
     <script src="{{ url_for('static', filename='ai-pet.js') }}"></script>
     <script src="{{ url_for('static', filename='ai-command.js') }}"></script>
 </body>

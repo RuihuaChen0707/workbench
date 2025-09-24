@@ -6,6 +6,7 @@ class AppState {
         this.aiChatManager = null;
         this.habitTracker = null;
         this.projectManager = null;  // 新增项目管理器
+        this.weeklyReportGenerator = null;  // 新增周报生成器
         this.viewManager = null;
     }
 
@@ -34,6 +35,10 @@ class AppState {
             // 初始化习惯追踪器
             this.habitTracker = new HabitTracker();
             this.habitTracker.init();
+            
+            // 初始化周报生成器
+            this.weeklyReportGenerator = new WeeklyReportGenerator();
+            this.weeklyReportGenerator.init();
             
             console.log('应用初始化完成');
         } catch (error) {
@@ -67,7 +72,8 @@ class ViewManager {
             todo: document.getElementById('nav-todo'),
             projects: document.getElementById('nav-projects'),  // 新增项目按钮
             ai: document.getElementById('nav-ai'),
-            habits: document.getElementById('nav-habits')
+            habits: document.getElementById('nav-habits'),
+            weeklyReport: document.getElementById('nav-weekly-report')  // 新增
         };
 
         // 视图容器
@@ -76,7 +82,8 @@ class ViewManager {
             'todo-view': document.getElementById('todo-view'),
             'projects-view': document.getElementById('projects-view'),  // 新增项目视图
             'ai-view': document.getElementById('ai-view'),
-            'habits-view': document.getElementById('habits-view')
+            'habits-view': document.getElementById('habits-view'),
+            'weekly-report-view': document.getElementById('weekly-report-view')  // 新增
         };
     }
 
@@ -122,6 +129,9 @@ class ViewManager {
         if (this.navButtons.habits) {
             this.navButtons.habits.addEventListener('click', () => this.showView('habits-view'));
         }
+        if (this.navButtons.weeklyReport) {
+            this.navButtons.weeklyReport.addEventListener('click', () => this.showView('weekly-report-view'));
+        }
     }
 
     showView(viewId) {
@@ -138,7 +148,8 @@ class ViewManager {
             'todo-view': document.getElementById('todo-list-view'),
             'projects-view': document.getElementById('projects-list'),
             'ai-view': document.getElementById('ai-list'),
-            'habits-view': document.getElementById('habits-list')
+            'habits-view': document.getElementById('habits-list'),
+            'weekly-report-view': document.getElementById('weekly-report-list')
         };
         
         Object.values(listViews).forEach(view => {
@@ -172,7 +183,8 @@ class ViewManager {
                 'todo-view': 'todo',
                 'projects-view': 'projects',
                 'ai-view': 'ai',
-                'habits-view': 'habits'
+                'habits-view': 'habits',
+                'weekly-report-view': 'weeklyReport'
             };
             
             const buttonKey = viewToButtonMap[viewId];
@@ -3110,6 +3122,423 @@ class SketchButton {
         if (this.element && this.element.parentNode) {
             this.element.parentNode.removeChild(this.element);
         }
+    }
+}
+
+// 周报生成器类
+class WeeklyReportGenerator {
+    constructor() {
+        this.generateBtn = null;
+        this.reportContent = null;
+        this.reportModal = null;
+        this.closeModalBtn = null;
+        this.copyReportBtn = null;
+        this.saveReportBtn = null;
+        this.reportTitle = null;
+        this.reportBody = null;
+    }
+
+    init() {
+        this.bindDOMElements();
+        if (this.checkElementsExist()) {
+            this.bindEvents();
+        } else {
+            console.warn('WeeklyReportGenerator: 部分DOM元素未找到，跳过初始化');
+        }
+    }
+
+    bindDOMElements() {
+        this.generateBtn = document.getElementById('generate-weekly-report');
+        this.reportContent = document.getElementById('report-content');
+        this.reportModal = document.getElementById('weekly-report-modal');
+        this.closeModalBtn = document.getElementById('close-report-modal');
+        this.copyReportBtn = document.getElementById('copy-report');
+        this.saveReportBtn = document.getElementById('save-report');
+        this.reportTitle = document.getElementById('report-title');
+        this.reportBody = document.getElementById('report-body');
+    }
+
+    checkElementsExist() {
+        const requiredElements = [
+            'generateBtn', 'reportContent', 'reportModal', 'closeModalBtn',
+            'copyReportBtn', 'saveReportBtn', 'reportTitle', 'reportBody'
+        ];
+        
+        const missingElements = requiredElements.filter(key => !this[key]);
+        
+        if (missingElements.length > 0) {
+            console.error('WeeklyReportGenerator缺少DOM元素:', missingElements);
+            return false;
+        }
+        
+        return true;
+    }
+
+    bindEvents() {
+        this.generateBtn?.addEventListener('click', () => this.generateWeeklyReport());
+        this.closeModalBtn?.addEventListener('click', () => this.hideModal());
+        this.copyReportBtn?.addEventListener('click', () => this.copyReport());
+        this.saveReportBtn?.addEventListener('click', () => this.saveReport());
+        
+        // 点击模态框外部关闭
+        this.reportModal?.addEventListener('click', (e) => {
+            if (e.target === this.reportModal) {
+                this.hideModal();
+            }
+        });
+        
+        // ESC键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.reportModal?.classList.contains('show')) {
+                this.hideModal();
+            }
+        });
+    }
+
+    async generateWeeklyReport() {
+        try {
+            this.showLoadingState();
+            
+            // 收集数据
+            const reportData = await this.collectWeeklyData();
+            
+            // 生成报告
+            const report = await this.generateReportContent(reportData);
+            
+            // 显示报告
+            this.displayReport(report);
+            this.showModal();
+            
+        } catch (error) {
+            console.error('生成周报时发生错误:', error);
+            this.showMessage('生成周报失败，请重试', 'error');
+        } finally {
+            this.hideLoadingState();
+        }
+    }
+
+    async collectWeeklyData() {
+        const endDate = new Date();
+        const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+        
+        const data = {
+            dateRange: {
+                start: startDate.toISOString().split('T')[0],
+                end: endDate.toISOString().split('T')[0]
+            },
+            projects: [],
+            habits: [],
+            todos: [],
+            notes: []
+        };
+
+        // 收集项目数据
+        if (window.appState?.projectManager?.projects) {
+            data.projects = window.appState.projectManager.projects.filter(project => {
+                const updatedAt = new Date(project.updatedAt || project.createdAt);
+                return updatedAt >= startDate && updatedAt <= endDate;
+            });
+        }
+
+        // 收集习惯数据
+        if (window.appState?.habitTracker?.habits) {
+            data.habits = window.appState.habitTracker.habits.map(habit => ({
+                name: habit.name,
+                totalMinutes: habit.total_minutes || 0
+            }));
+        }
+
+        // 收集待办事项数据
+        if (window.appState?.todoListManager?.todos) {
+            const allTodos = [];
+            Object.values(window.appState.todoListManager.todos).forEach(notebookTodos => {
+                notebookTodos.forEach(todo => {
+                    const createdAt = new Date(todo.createdAt);
+                    if (createdAt >= startDate && createdAt <= endDate) {
+                        allTodos.push({
+                            text: todo.text,
+                            completed: todo.completed,
+                            deadline: todo.deadline
+                        });
+                    }
+                });
+            });
+            data.todos = allTodos;
+        }
+
+        // 收集笔记数据
+        if (window.appState?.notebookManager?.notebooks) {
+            data.notes = window.appState.notebookManager.notebooks.filter(notebook => {
+                const updatedAt = new Date(notebook.updatedAt || notebook.createdAt);
+                return updatedAt >= startDate && updatedAt <= endDate;
+            }).map(notebook => ({
+                name: notebook.name,
+                wordCount: this.countWords(notebook.content || '')
+            }));
+        }
+
+        return data;
+    }
+
+    async generateReportContent(data) {
+        try {
+            const response = await fetch('/api/generate-weekly-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.report) {
+                return result.report;
+            } else {
+                // 如果API失败，使用本地生成
+                return this.generateLocalReport(data);
+            }
+        } catch (error) {
+            console.error('API生成周报失败，使用本地生成:', error);
+            return this.generateLocalReport(data);
+        }
+    }
+
+    generateLocalReport(data) {
+        const { dateRange, projects, habits, todos, notes } = data;
+        
+        let report = `# 周报 (${dateRange.start} 至 ${dateRange.end})\n\n`;
+        
+        // 项目进展
+        report += `## 📋 项目进展\n\n`;
+        if (projects.length > 0) {
+            projects.forEach(project => {
+                const statusText = this.getProjectStatusText(project.status);
+                report += `- **${project.title}**: ${statusText}\n`;
+            });
+        } else {
+            report += `本周无项目更新。\n`;
+        }
+        
+        // 任务完成情况
+        report += `\n## ✅ 任务完成情况\n\n`;
+        if (todos.length > 0) {
+            const completedTodos = todos.filter(todo => todo.completed);
+            const totalTodos = todos.length;
+            const completionRate = Math.round((completedTodos.length / totalTodos) * 100);
+            
+            report += `- 总任务数: ${totalTodos}\n`;
+            report += `- 已完成: ${completedTodos.length}\n`;
+            report += `- 完成率: ${completionRate}%\n\n`;
+            
+            if (completedTodos.length > 0) {
+                report += `### 已完成任务:\n`;
+                completedTodos.forEach(todo => {
+                    report += `- ${todo.text}\n`;
+                });
+            }
+        } else {
+            report += `本周无新增任务。\n`;
+        }
+        
+        // 习惯追踪
+        report += `\n## 🎯 习惯追踪\n\n`;
+        if (habits.length > 0) {
+            habits.forEach(habit => {
+                const timeText = this.formatTime(habit.totalMinutes);
+                report += `- **${habit.name}**: ${timeText}\n`;
+            });
+        } else {
+            report += `本周无习惯追踪记录。\n`;
+        }
+        
+        // 笔记创作
+        report += `\n## 📝 笔记创作\n\n`;
+        if (notes.length > 0) {
+            const totalWords = notes.reduce((sum, note) => sum + note.wordCount, 0);
+            report += `- 更新笔记数: ${notes.length}\n`;
+            report += `- 总字数: ${totalWords}\n\n`;
+            
+            report += `### 更新的笔记:\n`;
+            notes.forEach(note => {
+                report += `- **${note.name}**: ${note.wordCount} 字\n`;
+            });
+        } else {
+            report += `本周无笔记更新。\n`;
+        }
+        
+        // 总结
+        report += `\n## 📊 本周总结\n\n`;
+        report += `本周共完成了 ${todos.filter(t => t.completed).length} 个任务，`;
+        report += `更新了 ${notes.length} 个笔记，`;
+        report += `在习惯养成方面投入了 ${this.formatTime(habits.reduce((sum, h) => sum + h.totalMinutes, 0))}。\n\n`;
+        
+        if (projects.length > 0) {
+            const completedProjects = projects.filter(p => p.status === 'completed').length;
+            const inProgressProjects = projects.filter(p => p.status === 'in_progress').length;
+            
+            if (completedProjects > 0) {
+                report += `🎉 恭喜完成了 ${completedProjects} 个项目！\n`;
+            }
+            if (inProgressProjects > 0) {
+                report += `💪 目前有 ${inProgressProjects} 个项目正在进行中。\n`;
+            }
+        }
+        
+        return report;
+    }
+
+    displayReport(reportContent) {
+        if (this.reportTitle && this.reportBody) {
+            const lines = reportContent.split('\n');
+            const title = lines[0].replace(/^#\s*/, '') || '周报';
+            
+            this.reportTitle.textContent = title;
+            this.reportBody.innerHTML = this.markdownToHtml(reportContent);
+        }
+    }
+
+    markdownToHtml(markdown) {
+        return markdown
+            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^- (.*$)/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/^(.*)$/gm, '<p>$1</p>')
+            .replace(/<p><h/g, '<h')
+            .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
+            .replace(/<p><ul>/g, '<ul>')
+            .replace(/<\/ul><\/p>/g, '</ul>')
+            .replace(/<p><\/p>/g, '');
+    }
+
+    showModal() {
+        this.reportModal?.classList.add('show');
+    }
+
+    hideModal() {
+        this.reportModal?.classList.remove('show');
+    }
+
+    showLoadingState() {
+        if (this.generateBtn) {
+            this.generateBtn.disabled = true;
+            this.generateBtn.textContent = '生成中...';
+        }
+    }
+
+    hideLoadingState() {
+        if (this.generateBtn) {
+            this.generateBtn.disabled = false;
+            this.generateBtn.textContent = '生成周报';
+        }
+    }
+
+    async copyReport() {
+        try {
+            const reportText = this.reportBody?.textContent || '';
+            await navigator.clipboard.writeText(reportText);
+            this.showMessage('周报已复制到剪贴板', 'success');
+        } catch (error) {
+            console.error('复制失败:', error);
+            this.showMessage('复制失败，请重试', 'error');
+        }
+    }
+
+    saveReport() {
+        if (!window.appState?.notebookManager) {
+            this.showMessage('笔记本管理器未初始化', 'error');
+            return;
+        }
+
+        const reportText = this.reportBody?.textContent || '';
+        const title = this.reportTitle?.textContent || '周报';
+        
+        // 创建新笔记本保存周报
+        const timestamp = new Date().toLocaleDateString('zh-CN');
+        const notebookName = `${title} - ${timestamp}`;
+        
+        try {
+            // 这里需要调用NotebookManager的方法来创建新笔记本
+            // 由于当前NotebookManager没有公开的创建方法，我们直接操作其数据
+            const newNotebook = {
+                id: Date.now(),
+                name: notebookName,
+                content: reportText,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            window.appState.notebookManager.notebooks.push(newNotebook);
+            window.appState.notebookManager.saveNotebooks();
+            window.appState.notebookManager.renderNotebooks();
+            
+            this.showMessage('周报已保存为笔记', 'success');
+            this.hideModal();
+        } catch (error) {
+            console.error('保存周报失败:', error);
+            this.showMessage('保存失败，请重试', 'error');
+        }
+    }
+
+    getProjectStatusText(status) {
+        const statusMap = {
+            'pending': '待开始',
+            'in_progress': '进行中',
+            'completed': '已完成'
+        };
+        return statusMap[status] || status;
+    }
+
+    formatTime(minutes) {
+        if (minutes < 60) {
+            return `${minutes}分钟`;
+        }
+        
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        
+        if (remainingMinutes === 0) {
+            return `${hours}小时`;
+        }
+        
+        return `${hours}小时${remainingMinutes}分钟`;
+    }
+
+    countWords(text) {
+        if (!text) return 0;
+        // 简单的中英文字数统计
+        const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length;
+        const englishWords = (text.match(/[a-zA-Z]+/g) || []).length;
+        return chineseChars + englishWords;
+    }
+
+    showMessage(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <span class="toast-message">${this.escapeHtml(message)}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 
