@@ -1,0 +1,214 @@
+/* ⚡ 闪电效果样式 */
+
+/* 闪电背景动画 */
+.lightning-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.lightning-bolt {
+  position: absolute;
+  width: 2px;
+  background: linear-gradient(to bottom, 
+    transparent 0%, 
+    #00d4ff 20%, 
+    #ffffff 50%, 
+    #00d4ff 80%, 
+    transparent 100%);
+  opacity: 0;
+  animation: lightning-strike 2s ease-in-out infinite;
+  box-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #00d4ff;
+}
+
+@keyframes lightning-strike {
+  0% {
+    opacity: 0;
+    transform: translateY(-100vh) scaleY(0);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(-50vh) scaleY(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+  30% {
+    opacity: 0.8;
+    transform: translateY(20vh) scaleY(1.2);
+  }
+  40% {
+    opacity: 0;
+    transform: translateY(100vh) scaleY(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) scaleY(0);
+  }
+}
+
+/* 闪电按钮效果 */
+.lightning-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.lightning-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(0, 212, 255, 0.4), 
+    transparent);
+  transition: left 0.5s ease;
+}
+
+.lightning-btn:hover::before {
+  left: 100%;
+}
+
+.lightning-btn.lightning-active {
+  box-shadow: 
+    0 0 20px rgba(0, 212, 255, 0.6),
+    0 0 40px rgba(0, 212, 255, 0.4),
+    0 0 60px rgba(0, 212, 255, 0.2);
+  animation: lightning-pulse 0.3s ease-in-out;
+}
+
+@keyframes lightning-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 
+      0 0 20px rgba(0, 212, 255, 0.6),
+      0 0 40px rgba(0, 212, 255, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 
+      0 0 30px rgba(0, 212, 255, 0.8),
+      0 0 60px rgba(0, 212, 255, 0.6),
+      0 0 90px rgba(0, 212, 255, 0.4);
+  }
+}
+
+/* 闪电粒子效果 */
+.lightning-particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.lightning-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #00d4ff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00d4ff;
+  animation: particle-float 3s ease-out forwards;
+}
+
+@keyframes particle-float {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0) translateY(-200px);
+  }
+}
+
+/* 闪电文字效果 */
+.lightning-text {
+  position: relative;
+  color: #00d4ff;
+  text-shadow: 
+    0 0 10px #00d4ff,
+    0 0 20px #00d4ff,
+    0 0 30px #00d4ff;
+  animation: lightning-text-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes lightning-text-glow {
+  from {
+    text-shadow: 
+      0 0 10px #00d4ff,
+      0 0 20px #00d4ff,
+      0 0 30px #00d4ff;
+  }
+  to {
+    text-shadow: 
+      0 0 20px #00d4ff,
+      0 0 30px #00d4ff,
+      0 0 40px #00d4ff,
+      0 0 50px #00d4ff;
+  }
+}
+
+/* 页面加载闪电效果 */
+.lightning-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.lightning-loader-bolt {
+  width: 60px;
+  height: 60px;
+  border: 3px solid transparent;
+  border-top: 3px solid #00d4ff;
+  border-radius: 50%;
+  animation: lightning-spin 1s linear infinite;
+  position: relative;
+}
+
+.lightning-loader-bolt::before {
+  content: '⚡';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: #00d4ff;
+  animation: lightning-text-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes lightning-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
+  .lightning-bolt {
+    width: 1px;
+  }
+  
+  .lightning-particle {
+    width: 2px;
+    height: 2px;
+  }
+}
